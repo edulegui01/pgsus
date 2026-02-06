@@ -17,7 +17,7 @@ import { BancardModule } from './bancard/bancard.module';
       envFilePath: '.env',
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '..', 'assets'),
+      rootPath: join(process.cwd(), 'assets'),
       serveRoot: '/assets',
       serveStaticOptions: {
         index: false,

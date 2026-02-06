@@ -396,15 +396,7 @@ export class VentasAutService {
 
   private getProductImageUrl(codigoBarras: string): string {
     const extensions = ['.jpg', '.png', '.jpeg', '.webp'];
-    const assetsPath = join(
-      __dirname,
-      '..',
-      '..',
-      '..',
-      '..',
-      'assets',
-      'products',
-    );
+    const assetsPath = join(process.cwd(), 'assets', 'products');
 
     for (const ext of extensions) {
       const imagePath = join(assetsPath, `${codigoBarras}${ext}`);
