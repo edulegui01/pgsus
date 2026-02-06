@@ -137,48 +137,49 @@ export class VentasAutService {
       // );
 
       // Paso 5: Guardar venta en cajero1
-      const venta = await this.ventasService.crearVenta({
-        idCaja: data.caja,
-        idCliente: data.idCliente,
-        totalPeso: data.totalPeso,
-        totalPrecio: data.monto,
-        totalDescuento: data.totalDescuento ?? 0,
-        totalImpuesto: data.totalImpuesto ?? 0,
-        numeroFactura: data.facturaNro,
-        timbrado: data.timbrado,
-        medioPago: 1, // 1 = Tarjeta
-        respuestaPago: JSON.stringify(confirmacionResponse),
-        detalles: data.detalles,
-      });
+      // const venta = await this.ventasService.crearVenta({
+      //   idCaja: data.caja,
+      //   idCliente: data.idCliente,
+      //   totalPeso: data.totalPeso,
+      //   totalPrecio: data.monto,
+      //   totalDescuento: data.totalDescuento ?? 0,
+      //   totalImpuesto: data.totalImpuesto ?? 0,
+      //   numeroFactura: data.facturaNro,
+      //   timbrado: data.timbrado,
+      //   medioPago: 1, // 1 = Tarjeta
+      //   respuestaPago: JSON.stringify(confirmacionResponse),
+      //   detalles: data.detalles,
+      // });
 
       // Paso 6: Guardar pago tarjeta en cajero1
-      await this.ventasService.crearPagoTarjeta({
-        ventaCabeceraId: venta.id,
-        caja: data.caja,
-        monto: data.monto,
-        bin: inicioResponse.bin,
-        nsu: inicioResponse.nsu,
-        pan: confirmacionResponse.pan,
-        codigoAutorizacion: confirmacionResponse.codigoAutorizacion,
-        nroBoleta: confirmacionResponse.nroBoleta,
-        codigoComercio: confirmacionResponse.codigoComercio,
-        nombreTarjeta: confirmacionResponse.nombreTarjeta,
-        nombreCliente: confirmacionResponse.nombreCliente,
-        issuerId: confirmacionResponse.issuerId,
-        mensajeDisplay: confirmacionResponse.mensajeDisplay,
-        montoVuelto: confirmacionResponse.montoVuelto,
-        saldo: confirmacionResponse.saldo,
-        json: JSON.stringify(confirmacionResponse),
-      });
+      // await this.ventasService.crearPagoTarjeta({
+      //   ventaCabeceraId: venta.id,
+      //   caja: data.caja,
+      //   monto: data.monto,
+      //   bin: inicioResponse.bin,
+      //   nsu: inicioResponse.nsu,
+      //   pan: confirmacionResponse.pan,
+      //   codigoAutorizacion: confirmacionResponse.codigoAutorizacion,
+      //   nroBoleta: confirmacionResponse.nroBoleta,
+      //   codigoComercio: confirmacionResponse.codigoComercio,
+      //   nombreTarjeta: confirmacionResponse.nombreTarjeta,
+      //   nombreCliente: confirmacionResponse.nombreCliente,
+      //   issuerId: confirmacionResponse.issuerId,
+      //   mensajeDisplay: confirmacionResponse.mensajeDisplay,
+      //   montoVuelto: confirmacionResponse.montoVuelto,
+      //   saldo: confirmacionResponse.saldo,
+      //   json: JSON.stringify(confirmacionResponse),
+      // });
 
       this.logger.log(
-        `Pago con tarjeta completado exitosamente - nroBoleta: ${confirmacionResponse.nroBoleta}, ventaId: ${venta.id}`,
+        `Pago con tarjeta completado exitosamente - nroBoleta: ${confirmacionResponse.nroBoleta}`,
       );
 
       return {
         codigoAutorizacion: confirmacionResponse.codigoAutorizacion,
         nroBoleta: confirmacionResponse.nroBoleta,
-        ventaId: venta.id,
+        //ventaId: venta.id,
+        ventaId: 1,
       };
     } catch (error) {
       this.logger.error(`Error en pagoConTarjeta: ${error.message}`);
@@ -274,13 +275,14 @@ export class VentasAutService {
       // });
 
       this.logger.log(
-        `Pago con QR completado exitosamente - nroBoleta: ${qrResponse.nroBoleta}, ventaId: ${venta.id}`,
+        `Pago con QR completado exitosamente - nroBoleta: ${qrResponse.nroBoleta}, ventaId:`,
       );
 
       return {
         codigoAutorizacion: qrResponse.codigoAutorizacion,
         nroBoleta: qrResponse.nroBoleta,
-        ventaId: venta.id,
+        //ventaId: venta.id,
+        ventaId: 1,
       };
     } catch (error) {
       this.logger.error(`Error en pagoConQr: ${error.message}`);
