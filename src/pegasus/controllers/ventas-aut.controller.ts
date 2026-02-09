@@ -5,6 +5,7 @@ import {
   HttpStatus,
   HttpCode,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { VentasAutService } from '../services/ventas-aut.service';
 import { VentasAut } from '../entities/ventas-aut.entity';
@@ -16,23 +17,26 @@ import {
 
 @Controller('pos/ventas-aut')
 export class VentasAutController {
+  private readonly logger = new Logger(VentasAutService.name);
   constructor(private readonly ventasAutService: VentasAutService) {}
 
   @Post('pago-tarjeta')
   @HttpCode(HttpStatus.OK)
-  async pagoConTarjeta(@Body() data: PagoRequestDto): Promise<PagoResponseDto> {
-    // if (
-    //   data.caja === undefined ||
-    //   data.facturaNro === undefined ||
-    //   data.monto === undefined ||
-    //   !data.detalles?.length
-    // ) {
-    //   throw new BadRequestException(
-    //     'caja, facturaNro, monto y detalles son requeridos',
-    //   );
-    // }
+  pagoConTarjeta(@Body() data: PagoRequestDto) {
+    this.logger.log(`pago-tarjeta body: ${JSON.stringify(data, null, 2)}`);
+    if (
+      data.caja === undefined ||
+      data.facturaNro === undefined ||
+      data.monto === undefined ||
+      !data.detalles?.length
+    ) {
+      throw new BadRequestException(
+        'caja, facturaNro, monto y detalles son requeridos',
+      );
+    }
 
-    return this.ventasAutService.pagoConTarjeta(data);
+    //this.logger.log(data);
+    //return this.ventasAutService.pagoConTarjeta(data);
   }
 
   @Post('pago-qr')

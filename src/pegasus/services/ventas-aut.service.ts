@@ -91,7 +91,7 @@ export class VentasAutService {
       }
 
       // Paso 2: Registrar solicitud de cobro en Pegasus
-      //await this.solicitudCobroTarjeta(data.caja, 2, 1, inicioResponse.bin);
+      await this.solicitudCobroTarjeta(data.caja, 2, 1, inicioResponse.bin);
 
       // Paso 3: Confirmar pago en POS Bancard
       const confirmarRequest = {
@@ -128,48 +128,48 @@ export class VentasAutService {
       }
 
       // Paso 4: Registrar confirmación de cobro en Pegasus
-      // await this.confirmacionCobroTarjeta(
-      //   data.caja,
-      //   3,
-      //   confirmacionResponse.nroBoleta,
-      //   confirmacionResponse.codigoAutorizacion,
-      //   data.monto,
-      // );
+      await this.confirmacionCobroTarjeta(
+        data.caja,
+        3,
+        confirmacionResponse.nroBoleta,
+        confirmacionResponse.codigoAutorizacion,
+        data.monto,
+      );
 
       // Paso 5: Guardar venta en cajero1
-      // const venta = await this.ventasService.crearVenta({
-      //   idCaja: data.caja,
-      //   idCliente: data.idCliente,
-      //   totalPeso: data.totalPeso,
-      //   totalPrecio: data.monto,
-      //   totalDescuento: data.totalDescuento ?? 0,
-      //   totalImpuesto: data.totalImpuesto ?? 0,
-      //   numeroFactura: data.facturaNro,
-      //   timbrado: data.timbrado,
-      //   medioPago: 1, // 1 = Tarjeta
-      //   respuestaPago: JSON.stringify(confirmacionResponse),
-      //   detalles: data.detalles,
-      // });
+      const venta = await this.ventasService.crearVenta({
+        idCaja: data.caja,
+        idCliente: data.idCliente,
+        totalPeso: data.totalPeso,
+        totalPrecio: data.monto,
+        totalDescuento: data.totalDescuento ?? 0,
+        totalImpuesto: data.totalImpuesto ?? 0,
+        numeroFactura: data.facturaNro,
+        timbrado: data.timbrado,
+        medioPago: 1, // 1 = Tarjeta
+        respuestaPago: JSON.stringify(confirmacionResponse),
+        detalles: data.detalles,
+      });
 
       // Paso 6: Guardar pago tarjeta en cajero1
-      // await this.ventasService.crearPagoTarjeta({
-      //   ventaCabeceraId: venta.id,
-      //   caja: data.caja,
-      //   monto: data.monto,
-      //   bin: inicioResponse.bin,
-      //   nsu: inicioResponse.nsu,
-      //   pan: confirmacionResponse.pan,
-      //   codigoAutorizacion: confirmacionResponse.codigoAutorizacion,
-      //   nroBoleta: confirmacionResponse.nroBoleta,
-      //   codigoComercio: confirmacionResponse.codigoComercio,
-      //   nombreTarjeta: confirmacionResponse.nombreTarjeta,
-      //   nombreCliente: confirmacionResponse.nombreCliente,
-      //   issuerId: confirmacionResponse.issuerId,
-      //   mensajeDisplay: confirmacionResponse.mensajeDisplay,
-      //   montoVuelto: confirmacionResponse.montoVuelto,
-      //   saldo: confirmacionResponse.saldo,
-      //   json: JSON.stringify(confirmacionResponse),
-      // });
+      await this.ventasService.crearPagoTarjeta({
+        ventaCabeceraId: venta.id,
+        caja: data.caja,
+        monto: data.monto,
+        bin: inicioResponse.bin,
+        nsu: inicioResponse.nsu,
+        pan: confirmacionResponse.pan,
+        codigoAutorizacion: confirmacionResponse.codigoAutorizacion,
+        nroBoleta: confirmacionResponse.nroBoleta,
+        codigoComercio: confirmacionResponse.codigoComercio,
+        nombreTarjeta: confirmacionResponse.nombreTarjeta,
+        nombreCliente: confirmacionResponse.nombreCliente,
+        issuerId: confirmacionResponse.issuerId,
+        mensajeDisplay: confirmacionResponse.mensajeDisplay,
+        montoVuelto: confirmacionResponse.montoVuelto,
+        saldo: confirmacionResponse.saldo,
+        json: JSON.stringify(confirmacionResponse),
+      });
 
       this.logger.log(
         `Pago con tarjeta completado exitosamente - nroBoleta: ${confirmacionResponse.nroBoleta}`,
@@ -233,46 +233,46 @@ export class VentasAutService {
       }
 
       // Paso 3: Registrar confirmación de cobro en Pegasus
-      // await this.confirmacionCobroQr(
-      //   data.caja,
-      //   3,
-      //   qrResponse.nroBoleta,
-      //   qrResponse.codigoAutorizacion,
-      //   qrResponse.nombreTarjeta,
-      //   data.monto,
-      // );
+      await this.confirmacionCobroQr(
+        data.caja,
+        3,
+        qrResponse.nroBoleta,
+        qrResponse.codigoAutorizacion,
+        qrResponse.nombreTarjeta,
+        data.monto,
+      );
 
       // // Paso 4: Guardar venta en cajero1
-      // const venta = await this.ventasService.crearVenta({
-      //   idCaja: data.caja,
-      //   idCliente: data.idCliente,
-      //   totalPeso: data.totalPeso,
-      //   totalPrecio: data.monto,
-      //   totalDescuento: data.totalDescuento ?? 0,
-      //   totalImpuesto: data.totalImpuesto ?? 0,
-      //   numeroFactura: data.facturaNro,
-      //   timbrado: data.timbrado,
-      //   medioPago: 2, // 2 = QR
-      //   respuestaPago: JSON.stringify(qrResponse),
-      //   detalles: data.detalles,
-      // });
+      const venta = await this.ventasService.crearVenta({
+        idCaja: data.caja,
+        idCliente: data.idCliente,
+        totalPeso: data.totalPeso,
+        totalPrecio: data.monto,
+        totalDescuento: data.totalDescuento ?? 0,
+        totalImpuesto: data.totalImpuesto ?? 0,
+        numeroFactura: data.facturaNro,
+        timbrado: data.timbrado,
+        medioPago: 2, // 2 = QR
+        respuestaPago: JSON.stringify(qrResponse),
+        detalles: data.detalles,
+      });
 
       // Paso 5: Guardar pago QR en cajero1
-      // await this.ventasService.crearPagoQr({
-      //   ventaCabeceraId: venta.id,
-      //   caja: data.caja,
-      //   monto: data.monto,
-      //   codigoAutorizacion: qrResponse.codigoAutorizacion,
-      //   nroBoleta: qrResponse.nroBoleta,
-      //   codigoComercio: qrResponse.codigoComercio,
-      //   nombreTarjeta: qrResponse.nombreTarjeta,
-      //   nombreCliente: qrResponse.nombreCliente,
-      //   issuerId: qrResponse.issuerId,
-      //   mensajeDisplay: qrResponse.mensajeDisplay,
-      //   montoVuelto: qrResponse.montoVuelto,
-      //   saldo: qrResponse.saldo,
-      //   json: JSON.stringify(qrResponse),
-      // });
+      await this.ventasService.crearPagoQr({
+        ventaCabeceraId: venta.id,
+        caja: data.caja,
+        monto: data.monto,
+        codigoAutorizacion: qrResponse.codigoAutorizacion,
+        nroBoleta: qrResponse.nroBoleta,
+        codigoComercio: qrResponse.codigoComercio,
+        nombreTarjeta: qrResponse.nombreTarjeta,
+        nombreCliente: qrResponse.nombreCliente,
+        issuerId: qrResponse.issuerId,
+        mensajeDisplay: qrResponse.mensajeDisplay,
+        montoVuelto: qrResponse.montoVuelto,
+        saldo: qrResponse.saldo,
+        json: JSON.stringify(qrResponse),
+      });
 
       this.logger.log(
         `Pago con QR completado exitosamente - nroBoleta: ${qrResponse.nroBoleta}, ventaId:`,
