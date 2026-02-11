@@ -136,40 +136,43 @@ export class VentasAutService {
         data.monto,
       );
 
-      // Paso 5: Guardar venta en cajero1
-      const venta = await this.ventasService.crearVenta({
-        idCaja: data.caja,
-        idCliente: data.idCliente,
-        totalPeso: data.totalPeso,
-        totalPrecio: data.monto,
-        totalDescuento: data.totalDescuento ?? 0,
-        totalImpuesto: data.totalImpuesto ?? 0,
-        numeroFactura: data.facturaNro,
-        timbrado: data.timbrado,
-        medioPago: 1, // 1 = Tarjeta
-        respuestaPago: JSON.stringify(confirmacionResponse),
-        detalles: data.detalles,
-      });
+      // Paso 5 y 6: Guardar historial en cajero1 (no bloquea el flujo de pago)
+      try {
+        const venta = await this.ventasService.crearVenta({
+          idCaja: data.caja,
+          idCliente: data.idCliente,
+          totalPeso: data.totalPeso,
+          totalPrecio: data.monto,
+          totalDescuento: data.totalDescuento ?? 0,
+          totalImpuesto: data.totalImpuesto ?? 0,
+          numeroFactura: data.facturaNro,
+          timbrado: data.timbrado,
+          medioPago: 1, // 1 = Tarjeta
+          respuestaPago: JSON.stringify(confirmacionResponse),
+          detalles: data.detalles,
+        });
 
-      // Paso 6: Guardar pago tarjeta en cajero1
-      await this.ventasService.crearPagoTarjeta({
-        ventaCabeceraId: venta.id,
-        caja: data.caja,
-        monto: data.monto,
-        bin: inicioResponse.bin,
-        nsu: inicioResponse.nsu,
-        pan: confirmacionResponse.pan,
-        codigoAutorizacion: confirmacionResponse.codigoAutorizacion,
-        nroBoleta: confirmacionResponse.nroBoleta,
-        codigoComercio: confirmacionResponse.codigoComercio,
-        nombreTarjeta: confirmacionResponse.nombreTarjeta,
-        nombreCliente: confirmacionResponse.nombreCliente,
-        issuerId: confirmacionResponse.issuerId,
-        mensajeDisplay: confirmacionResponse.mensajeDisplay,
-        montoVuelto: confirmacionResponse.montoVuelto,
-        saldo: confirmacionResponse.saldo,
-        json: JSON.stringify(confirmacionResponse),
-      });
+        await this.ventasService.crearPagoTarjeta({
+          ventaCabeceraId: venta.id,
+          caja: data.caja,
+          monto: data.monto,
+          bin: inicioResponse.bin,
+          nsu: inicioResponse.nsu,
+          pan: confirmacionResponse.pan,
+          codigoAutorizacion: confirmacionResponse.codigoAutorizacion,
+          nroBoleta: confirmacionResponse.nroBoleta,
+          codigoComercio: confirmacionResponse.codigoComercio,
+          nombreTarjeta: confirmacionResponse.nombreTarjeta,
+          nombreCliente: confirmacionResponse.nombreCliente,
+          issuerId: confirmacionResponse.issuerId,
+          mensajeDisplay: confirmacionResponse.mensajeDisplay,
+          montoVuelto: confirmacionResponse.montoVuelto,
+          saldo: confirmacionResponse.saldo,
+          json: JSON.stringify(confirmacionResponse),
+        });
+      } catch (historialError) {
+        this.logger.error(`Error guardando historial en cajero1 (tarjeta): ${historialError.message}`);
+      }
 
       this.logger.log(
         `Pago con tarjeta completado exitosamente - nroBoleta: ${confirmacionResponse.nroBoleta}`,
@@ -242,40 +245,43 @@ export class VentasAutService {
         data.monto,
       );
 
-      // // Paso 4: Guardar venta en cajero1
-      const venta = await this.ventasService.crearVenta({
-        idCaja: data.caja,
-        idCliente: data.idCliente,
-        totalPeso: data.totalPeso,
-        totalPrecio: data.monto,
-        totalDescuento: data.totalDescuento ?? 0,
-        totalImpuesto: data.totalImpuesto ?? 0,
-        numeroFactura: data.facturaNro,
-        timbrado: data.timbrado,
-        medioPago: 2, // 2 = QR
-        respuestaPago: JSON.stringify(qrResponse),
-        detalles: data.detalles,
-      });
+      // Paso 4 y 5: Guardar historial en cajero1 (no bloquea el flujo de pago)
+      try {
+        const venta = await this.ventasService.crearVenta({
+          idCaja: data.caja,
+          idCliente: data.idCliente,
+          totalPeso: data.totalPeso,
+          totalPrecio: data.monto,
+          totalDescuento: data.totalDescuento ?? 0,
+          totalImpuesto: data.totalImpuesto ?? 0,
+          numeroFactura: data.facturaNro,
+          timbrado: data.timbrado,
+          medioPago: 2, // 2 = QR
+          respuestaPago: JSON.stringify(qrResponse),
+          detalles: data.detalles,
+        });
 
-      // Paso 5: Guardar pago QR en cajero1
-      await this.ventasService.crearPagoQr({
-        ventaCabeceraId: venta.id,
-        caja: data.caja,
-        monto: data.monto,
-        codigoAutorizacion: qrResponse.codigoAutorizacion,
-        nroBoleta: qrResponse.nroBoleta,
-        codigoComercio: qrResponse.codigoComercio,
-        nombreTarjeta: qrResponse.nombreTarjeta,
-        nombreCliente: qrResponse.nombreCliente,
-        issuerId: qrResponse.issuerId,
-        mensajeDisplay: qrResponse.mensajeDisplay,
-        montoVuelto: qrResponse.montoVuelto,
-        saldo: qrResponse.saldo,
-        json: JSON.stringify(qrResponse),
-      });
+        await this.ventasService.crearPagoQr({
+          ventaCabeceraId: venta.id,
+          caja: data.caja,
+          monto: data.monto,
+          codigoAutorizacion: qrResponse.codigoAutorizacion,
+          nroBoleta: qrResponse.nroBoleta,
+          codigoComercio: qrResponse.codigoComercio,
+          nombreTarjeta: qrResponse.nombreTarjeta,
+          nombreCliente: qrResponse.nombreCliente,
+          issuerId: qrResponse.issuerId,
+          mensajeDisplay: qrResponse.mensajeDisplay,
+          montoVuelto: qrResponse.montoVuelto,
+          saldo: qrResponse.saldo,
+          json: JSON.stringify(qrResponse),
+        });
+      } catch (historialError) {
+        this.logger.error(`Error guardando historial en cajero1 (QR): ${historialError.message}`);
+      }
 
       this.logger.log(
-        `Pago con QR completado exitosamente - nroBoleta: ${qrResponse.nroBoleta}, ventaId:`,
+        `Pago con QR completado exitosamente - nroBoleta: ${qrResponse.nroBoleta}`,
       );
 
       return {
@@ -369,6 +375,7 @@ export class VentasAutService {
 
       // Build response model
       const modelProducTicket: ModelProducTicket = {
+        codigo: insert.codigo,
         codigo_barras: insert.codigo_barra,
         precio: insert.precio,
         total: insert.precio * insert.cantidad,

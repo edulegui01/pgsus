@@ -15,4 +15,12 @@ export class ScanningPesoService {
   async findByScanning(scanning: string): Promise<ScanningPeso | null> {
     return this.scanningPesoRepository.findOne({ where: { scanning } });
   }
+
+  async create(dto: CreateScanningPesoDto): Promise<ScanningPeso> {
+    const entity = this.scanningPesoRepository.create({
+      scanning: dto.scanning,
+      peso: dto.peso_gramos,
+    });
+    return this.scanningPesoRepository.save(entity);
+  }
 }

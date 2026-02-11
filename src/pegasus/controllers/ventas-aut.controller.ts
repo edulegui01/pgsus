@@ -22,7 +22,7 @@ export class VentasAutController {
 
   @Post('pago-tarjeta')
   @HttpCode(HttpStatus.OK)
-  pagoConTarjeta(@Body() data: PagoRequestDto) {
+  pagoConTarjeta(@Body() data: PagoRequestDto): Promise<PagoResponseDto> {
     this.logger.log(`pago-tarjeta body: ${JSON.stringify(data, null, 2)}`);
     if (
       data.caja === undefined ||
@@ -35,8 +35,7 @@ export class VentasAutController {
       );
     }
 
-    //this.logger.log(data);
-    //return this.ventasAutService.pagoConTarjeta(data);
+    return this.ventasAutService.pagoConTarjeta(data);
   }
 
   @Post('pago-qr')

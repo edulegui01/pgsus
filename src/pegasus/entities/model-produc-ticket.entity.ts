@@ -1,4 +1,5 @@
 export interface ModelProducTicket {
+  codigo: string;
   codigo_barras: string;
   precio: number;
   total: number;

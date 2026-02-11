@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { VentaCabecera } from './entities/venta-cabecera.entity';
 import { VentaDetalle } from './entities/venta-detalle.entity';
 import { PagoTarjeta } from './entities/pago-tarjeta.entity';
@@ -21,49 +21,64 @@ export class VentasService {
     private readonly pagoTarjetaRepository: Repository<PagoTarjeta>,
     @InjectRepository(PagoQr)
     private readonly pagoQrRepository: Repository<PagoQr>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async crearVenta(data: CrearVentaDto): Promise<VentaCabecera> {
     this.logger.log(`Creando venta - caja: ${data.idCaja}, total: ${data.totalPrecio}`);
 
-    // Crear cabecera
-    const cabecera = this.cabeceraRepository.create({
-      idCaja: data.idCaja,
-      idCliente: data.idCliente ?? null,
-      totalPeso: data.totalPeso ?? null,
-      totalPrecio: data.totalPrecio,
-      totalDescuento: data.totalDescuento ?? 0,
-      totalImpuesto: data.totalImpuesto ?? 0,
-      numeroFactura: data.numeroFactura ?? null,
-      timbrado: data.timbrado ?? null,
-      medioPago: data.medioPago,
-      fechaVenta: new Date(),
-      fechaActualizacion: new Date(),
-      estado: 1,
-      respuestaPago: data.respuestaPago ?? null,
-    });
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    const cabeceraGuardada = await this.cabeceraRepository.save(cabecera);
-
-    this.logger.log(`Cabecera creada con ID: ${cabeceraGuardada.id}`);
-
-    // Crear detalles
-    for (const item of data.detalles) {
-      const detalle = this.detalleRepository.create({
-        cabeceraId: cabeceraGuardada.id,
-        codigoBarras: item.codigoBarras,
-        cantidad: item.cantidad,
-        totalPrecio: item.totalPrecio,
-        totalDescuento: item.totalDescuento ?? 0,
-        promocionAplicada: item.promocionAplicada ?? null,
+    try {
+      // Crear cabecera
+      const cabecera = queryRunner.manager.create(VentaCabecera, {
+        idCaja: data.idCaja,
+        idCliente: data.idCliente ?? null,
+        totalPeso: data.totalPeso ?? null,
+        totalPrecio: data.totalPrecio,
+        totalDescuento: data.totalDescuento ?? 0,
+        totalImpuesto: data.totalImpuesto ?? 0,
+        numeroFactura: data.numeroFactura ?? null,
+        timbrado: data.timbrado ?? null,
+        medioPago: data.medioPago,
+        fechaVenta: new Date(),
+        fechaActualizacion: new Date(),
+        estado: 1,
+        respuestaPago: data.respuestaPago ?? null,
       });
 
-      await this.detalleRepository.save(detalle);
+      const cabeceraGuardada = await queryRunner.manager.save(cabecera);
+
+      this.logger.log(`Cabecera creada con ID: ${cabeceraGuardada.id}`);
+
+      // Crear detalles
+      for (const item of data.detalles) {
+        const detalle = queryRunner.manager.create(VentaDetalle, {
+          cabeceraId: cabeceraGuardada.id,
+          codigoBarras: item.codigoBarras,
+          cantidad: item.cantidad,
+          totalPrecio: item.totalPrecio,
+          totalDescuento: item.totalDescuento ?? 0,
+          promocionAplicada: item.promocionAplicada ?? null,
+        });
+
+        await queryRunner.manager.save(detalle);
+      }
+
+      await queryRunner.commitTransaction();
+
+      this.logger.log(`Venta creada exitosamente con ${data.detalles.length} items`);
+
+      return cabeceraGuardada;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      this.logger.error(`Error creando venta, rollback ejecutado: ${error.message}`);
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-
-    this.logger.log(`Venta creada exitosamente con ${data.detalles.length} items`);
-
-    return cabeceraGuardada;
   }
 
   async findById(id: number): Promise<VentaCabecera | null> {
