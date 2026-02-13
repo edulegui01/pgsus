@@ -27,6 +27,33 @@ export class BancardService {
   }
 
   /**
+   * Verifica la conexión con el POS
+   */
+  async verificarConexion(): Promise<{ eco: number }> {
+    const url = `${this.baseUrl}/pos/eco`;
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<{ eco: number }>(url, { eco: 1 }),
+      );
+
+      return response.data;
+    } catch (error) {
+      const errorResponse: BancardErrorDto = error.response?.data || {
+        statusCode: 500,
+        error: 'Internal Server Error',
+        message: 'No se pudo establecer conexión con el POS',
+      };
+
+      this.logger.error(
+        `Error en verificarConexion: ${JSON.stringify(errorResponse)}`,
+      );
+
+      throw new HttpException(errorResponse, error.response?.status || 500);
+    }
+  }
+
+  /**
    * Primera parte del pago con tarjeta - Inicia la transacción en el POS
    * Devuelve el BIN y NSU necesarios para confirmar el pago
    */

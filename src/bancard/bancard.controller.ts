@@ -13,6 +13,11 @@ import {
 export class BancardController {
   constructor(private readonly bancardService: BancardService) {}
 
+  @Post('verificar-conexion')
+  async verificarConexion(): Promise<{ eco: number }> {
+    return this.bancardService.verificarConexion();
+  }
+
   @Post('iniciar-pago-tarjeta')
   async iniciarPagoTarjeta(
     @Body() data: IniciarPagoTarjetaRequestDto,

@@ -171,7 +171,9 @@ export class VentasAutService {
           json: JSON.stringify(confirmacionResponse),
         });
       } catch (historialError) {
-        this.logger.error(`Error guardando historial en cajero1 (tarjeta): ${historialError.message}`);
+        this.logger.error(
+          `Error guardando historial en cajero1 (tarjeta): ${historialError.message}`,
+        );
       }
 
       this.logger.log(
@@ -277,7 +279,9 @@ export class VentasAutService {
           json: JSON.stringify(qrResponse),
         });
       } catch (historialError) {
-        this.logger.error(`Error guardando historial en cajero1 (QR): ${historialError.message}`);
+        this.logger.error(
+          `Error guardando historial en cajero1 (QR): ${historialError.message}`,
+        );
       }
 
       this.logger.log(
@@ -806,7 +810,7 @@ export class VentasAutService {
 
       if (!result) {
         throw new BadRequestException(
-          'Client details are not ready after verification',
+          'Problemas con la conexion con el SLC pegasus',
         );
       }
 
@@ -818,7 +822,7 @@ export class VentasAutService {
 
       if (result.estado !== 1) {
         throw new BadRequestException(
-          'Client details are not ready after verification',
+          'Problemas con la conexion con el SLC pegasus',
         );
       }
 
