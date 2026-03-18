@@ -9,6 +9,7 @@ import { ScanningPesoModule } from './cajero1/scanning-peso/scanning-peso.module
 import { ParametrosModule } from './cajero1/parametros/parametros.module';
 import { VentasModule } from './cajero1/ventas/ventas.module';
 import { BancardModule } from './bancard/bancard.module';
+import { AccessControlModule } from './access-control/access-control.module';
 
 @Module({
   imports: [
@@ -32,6 +33,8 @@ import { BancardModule } from './bancard/bancard.module';
       database: process.env.MariaDB_DATABASE || 'cajero1',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false,
+      retryAttempts: 10,
+      retryDelay: 5000,
     }),
 
     // SQL Server (punto de venta existente) - Usando mssql directo via DatabaseService
@@ -47,6 +50,9 @@ import { BancardModule } from './bancard/bancard.module';
 
     // Bancard
     BancardModule,
+
+    // Control de acceso
+    AccessControlModule,
   ],
 })
 export class AppModule {}

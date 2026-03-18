@@ -9,11 +9,14 @@ export class DatabaseService implements OnModuleInit {
 
   constructor(private configService: ConfigService) {}
 
+  private readonly maxRetries = 10;
+  private readonly retryDelay = 5000;
+
   async onModuleInit() {
-    await this.connect();
+    await this.connectWithRetry();
   }
 
-  private async connect() {
+  private async connectWithRetry(attempt = 1) {
     try {
       const config: sql.config = {
         server: this.configService.get<string>('SQLSERVER_HOST'),
@@ -33,7 +36,17 @@ export class DatabaseService implements OnModuleInit {
       this.pool = await new sql.ConnectionPool(config).connect();
       this.logger.log('Conexión a SQL Server establecida exitosamente');
     } catch (error) {
-      this.logger.error('Error al conectar con SQL Server:', error);
+      if (attempt < this.maxRetries) {
+        this.logger.warn(
+          `Error al conectar con SQL Server (intento ${attempt}/${this.maxRetries}). Reintentando en ${this.retryDelay / 1000}s...`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, this.retryDelay));
+        return this.connectWithRetry(attempt + 1);
+      }
+      this.logger.error(
+        `No se pudo conectar a SQL Server después de ${this.maxRetries} intentos:`,
+        error,
+      );
       throw error;
     }
   }
