@@ -66,10 +66,11 @@ export class VentasAutService {
       try {
         inicioResponse =
           await this.bancardService.iniciarPagoTarjeta(iniciarRequest);
+        const { bin: _bin1, ...inicioResponseLog } = inicioResponse;
         await this.bancardLogRepository.save({
           tipo_operacion: 'INICIAR_TARJETA',
           request_json: JSON.stringify(iniciarRequest),
-          response_json: JSON.stringify(inicioResponse),
+          response_json: JSON.stringify(inicioResponseLog),
           status: 'SUCCESS',
           http_status_code: 200,
           caja: data.caja,
@@ -103,10 +104,12 @@ export class VentasAutService {
       try {
         confirmacionResponse =
           await this.bancardService.confirmarPagoTarjeta(confirmarRequest);
+        const { nombreCliente: _nc1, pan: _pan, ...confirmacionResponseLog } = confirmacionResponse;
+        const { bin: _bin2, ...confirmarRequestLog } = confirmarRequest;
         await this.bancardLogRepository.save({
           tipo_operacion: 'CONFIRMAR_TARJETA',
-          request_json: JSON.stringify(confirmarRequest),
-          response_json: JSON.stringify(confirmacionResponse),
+          request_json: JSON.stringify(confirmarRequestLog),
+          response_json: JSON.stringify(confirmacionResponseLog),
           status: 'SUCCESS',
           http_status_code: 200,
           caja: data.caja,
@@ -213,10 +216,11 @@ export class VentasAutService {
       let qrResponse;
       try {
         qrResponse = await this.bancardService.pagoQr(qrRequest);
+        const { nombreCliente: _nc2, pan: _pan2, ...qrResponseLog } = qrResponse as any;
         await this.bancardLogRepository.save({
           tipo_operacion: 'PAGO_QR',
           request_json: JSON.stringify(qrRequest),
-          response_json: JSON.stringify(qrResponse),
+          response_json: JSON.stringify(qrResponseLog),
           status: 'SUCCESS',
           http_status_code: 200,
           caja: data.caja,
