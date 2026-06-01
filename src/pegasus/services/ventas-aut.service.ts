@@ -104,7 +104,11 @@ export class VentasAutService {
       try {
         confirmacionResponse =
           await this.bancardService.confirmarPagoTarjeta(confirmarRequest);
-        const { nombreCliente: _nc1, pan: _pan, ...confirmacionResponseLog } = confirmacionResponse;
+        const {
+          nombreCliente: _nc1,
+          pan: _pan,
+          ...confirmacionResponseLog
+        } = confirmacionResponse;
         const { bin: _bin2, ...confirmarRequestLog } = confirmarRequest;
         await this.bancardLogRepository.save({
           tipo_operacion: 'CONFIRMAR_TARJETA',
@@ -216,7 +220,11 @@ export class VentasAutService {
       let qrResponse;
       try {
         qrResponse = await this.bancardService.pagoQr(qrRequest);
-        const { nombreCliente: _nc2, pan: _pan2, ...qrResponseLog } = qrResponse as any;
+        const {
+          nombreCliente: _nc2,
+          pan: _pan2,
+          ...qrResponseLog
+        } = qrResponse;
         await this.bancardLogRepository.save({
           tipo_operacion: 'PAGO_QR',
           request_json: JSON.stringify(qrRequest),
@@ -376,10 +384,23 @@ export class VentasAutService {
         insert.codigo,
       );
 
-      // Search weight from scanning_peso
-      const scanningPeso = await this.scanningPesoService.findByScanning(
-        insert.codigo,
-      );
+      // Resolve weight: for weighable barcodes (EAN-13 starting with '2'),
+      // extract grams from digits 8-12; otherwise query scanning_peso
+      const esPesable =
+        insert.codigo_barra?.length === 13 &&
+        insert.codigo_barra.startsWith('2');
+      let pesoGramos = '';
+      if (esPesable) {
+        pesoGramos = parseInt(
+          insert.codigo_barra.substring(7, 12),
+          10,
+        ).toString();
+      } else {
+        const scanningPeso = await this.scanningPesoService.findByScanning(
+          insert.codigo,
+        );
+        pesoGramos = scanningPeso?.peso?.toString() ?? '';
+      }
 
       // Build response model
       const modelProducTicket: ModelProducTicket = {
@@ -388,10 +409,12 @@ export class VentasAutService {
         precio: insert.precio,
         total: insert.precio * insert.cantidad,
         descripcion: producto.descripcion_corta ?? '',
-        peso_gramos: scanningPeso?.peso?.toString() ?? '',
+        peso_gramos: pesoGramos,
         cantidad: insert.cantidad,
         total_venta: insert.total_venta,
-        imagen: this.getProductImageUrl(insert.codigo_barra),
+        imagen: this.getProductImageUrl(
+          esPesable ? insert.codigo : insert.codigo_barra,
+        ),
       };
 
       this.logger.log(

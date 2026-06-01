@@ -64,7 +64,6 @@ export class BancardService {
 
     try {
       this.logger.log(`Enviando petición venta-ux a Bancard: ${url}`);
-      this.logger.log(`Datos: ${JSON.stringify(data)}`);
 
       const response = await firstValueFrom(
         this.httpService.post<IniciarPagoTarjetaResponseDto>(url, {
@@ -73,7 +72,7 @@ export class BancardService {
         }),
       );
 
-      this.logger.log(`Respuesta venta-ux: ${JSON.stringify(response.data)}`);
+      this.logger.log(`Respuesta venta-ux: ok | facturaNro: ${data.facturaNro}`);
 
       return response.data;
     } catch (error) {
@@ -102,7 +101,6 @@ export class BancardService {
 
     try {
       this.logger.log(`Enviando petición descuento a Bancard: ${url}`);
-      this.logger.log(`Datos: ${JSON.stringify(data)}`);
 
       const response = await firstValueFrom(
         this.httpService.post<VentaTarjetaResponseDto>(url, {
@@ -112,7 +110,7 @@ export class BancardService {
         }),
       );
 
-      this.logger.log(`Respuesta descuento: ${JSON.stringify(response.data)}`);
+      this.logger.log(`Respuesta descuento: ok | nsu: ${data.nsu}`);
 
       return response.data;
     } catch (error) {
@@ -139,7 +137,6 @@ export class BancardService {
 
     try {
       this.logger.log(`Enviando petición QR a Bancard: ${url}`);
-      this.logger.log(`Datos: ${JSON.stringify(data)}`);
 
       const response = await firstValueFrom(
         this.httpService.post<VentaQrResponseDto>(url, {
@@ -148,7 +145,7 @@ export class BancardService {
         }),
       );
 
-      this.logger.log(`Respuesta QR exitosa: ${JSON.stringify(response.data)}`);
+      this.logger.log(`Respuesta QR exitosa | facturaNro: ${data.facturaNro}`);
 
       return response.data;
     } catch (error) {
