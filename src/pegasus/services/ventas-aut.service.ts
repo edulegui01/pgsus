@@ -388,7 +388,7 @@ export class VentasAutService {
       // extract grams from digits 8-12; otherwise query scanning_peso
       const esPesable =
         insert.codigo_barra?.length === 13 &&
-        insert.codigo_barra.startsWith('2');
+        insert.codigo_barra.startsWith('20');
       let pesoGramos = '';
       if (esPesable) {
         pesoGramos = parseInt(
@@ -407,7 +407,9 @@ export class VentasAutService {
         codigo: insert.codigo,
         codigo_barras: insert.codigo_barra,
         precio: insert.precio,
-        total: insert.precio * insert.cantidad,
+        total: esPesable
+          ? Math.round((parseInt(pesoGramos) / 1000) * insert.precio)
+          : insert.precio * insert.cantidad,
         descripcion: producto.descripcion_corta ?? '',
         peso_gramos: pesoGramos,
         cantidad: insert.cantidad,
@@ -415,6 +417,7 @@ export class VentasAutService {
         imagen: this.getProductImageUrl(
           esPesable ? insert.codigo : insert.codigo_barra,
         ),
+        es_pesable: esPesable,
       };
 
       this.logger.log(

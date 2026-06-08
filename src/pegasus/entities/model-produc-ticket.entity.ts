@@ -8,4 +8,5 @@ export interface ModelProducTicket {
   cantidad: number;
   total_venta: number;
   imagen: string;
+  es_pesable: boolean;
 }

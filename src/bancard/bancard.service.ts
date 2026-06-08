@@ -72,7 +72,9 @@ export class BancardService {
         }),
       );
 
-      this.logger.log(`Respuesta venta-ux: ok | facturaNro: ${data.facturaNro}`);
+      this.logger.log(
+        `Respuesta venta-ux: ok | facturaNro: ${data.facturaNro}`,
+      );
 
       return response.data;
     } catch (error) {
@@ -149,6 +151,7 @@ export class BancardService {
 
       return response.data;
     } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const errorResponse: BancardErrorDto = error.response?.data || {
         statusCode: 500,
         error: 'Internal Server Error',
