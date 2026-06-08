@@ -389,17 +389,26 @@ export class VentasAutService {
       const esPesable =
         insert.codigo_barra?.length === 13 &&
         insert.codigo_barra.startsWith('20');
+
+      this.logger.log(
+        `[getProduct] codigo_barra: "${insert.codigo_barra}" | largo: ${insert.codigo_barra?.length} | startsWith('20'): ${insert.codigo_barra?.startsWith('20')} | esPesable: ${esPesable}`,
+      );
+
       let pesoGramos = '';
       if (esPesable) {
-        pesoGramos = parseInt(
-          insert.codigo_barra.substring(7, 12),
-          10,
-        ).toString();
+        const pesoRaw = insert.codigo_barra.substring(7, 12);
+        pesoGramos = parseInt(pesoRaw, 10).toString();
+        this.logger.log(
+          `[getProduct] Descomposicion pesable - prefijo: "${insert.codigo_barra.substring(0, 2)}" | codigo_interno: "${insert.codigo_barra.substring(2, 7)}" | peso_raw: "${pesoRaw}" | pesoGramos: "${pesoGramos}" | digito_verificador: "${insert.codigo_barra.substring(12)}"`,
+        );
       } else {
         const scanningPeso = await this.scanningPesoService.findByScanning(
           insert.codigo,
         );
         pesoGramos = scanningPeso?.peso?.toString() ?? '';
+        this.logger.log(
+          `[getProduct] No pesable - pesoGramos desde scanning_peso: "${pesoGramos}"`,
+        );
       }
 
       // Build response model
