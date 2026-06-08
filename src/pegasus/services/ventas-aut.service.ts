@@ -372,6 +372,10 @@ export class VentasAutService {
       // Verify insert with polling
       const insert = await this.verifyPegasusInsert(idInsertado);
 
+      this.logger.log(
+        `[getProduct] insert - cantidad: ${insert?.cantidad}, precio: ${insert?.precio}, codigo: ${insert?.codigo}, codigo_barra: ${insert?.codigo_barra}, estado: ${insert?.estado}`,
+      );
+
       // Check if finally the state is 1
       if (!insert || insert.estado !== 1) {
         throw new BadRequestException(
