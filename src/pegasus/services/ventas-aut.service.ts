@@ -355,15 +355,16 @@ export class VentasAutService {
   async getProduct(
     caja: number,
     scan: string,
-    cantidad: number,
+    cantidad_a_insertar: number,
+    cantidad_acumulada: number,
   ): Promise<ModelProducTicket> {
     try {
       this.logger.log(
-        `Getting product - caja: ${caja}, scan: ${scan}, cantidad: ${cantidad}`,
+        `Getting product - caja: ${caja}, scan: ${scan}, cantidad_a_insertar: ${cantidad_a_insertar}, cantidad_acumulada: ${cantidad_acumulada}`,
       );
 
       // Insert product
-      const idInsertado = await this.insertProduct(caja, scan, 1, cantidad);
+      const idInsertado = await this.insertProduct(caja, scan, 1, cantidad_a_insertar);
 
       if (idInsertado <= 0) {
         throw new BadRequestException('Could not insert product');
@@ -388,8 +389,8 @@ export class VentasAutService {
         insert.codigo,
       );
 
-      // Resolve weight: for weighable barcodes (EAN-13 starting with '2'),
-      // extract grams from digits 8-12; otherwise query scanning_peso
+      // Barcodes starting with '20' and 13 digits are weighable (EAN-13 internal use).
+      // Weight in grams is encoded in digits 8-12 of the barcode.
       const esPesable =
         insert.codigo_barra?.length === 13 &&
         insert.codigo_barra.startsWith('20');
@@ -422,10 +423,10 @@ export class VentasAutService {
         precio: insert.precio,
         total: esPesable
           ? Math.round((parseInt(pesoGramos) / 1000) * insert.precio)
-          : insert.precio * insert.cantidad,
+          : insert.precio * cantidad_acumulada,
         descripcion: producto.descripcion_corta ?? '',
         peso_gramos: pesoGramos,
-        cantidad: insert.cantidad,
+        cantidad: cantidad_acumulada,
         total_venta: insert.total_venta,
         imagen: this.getProductImageUrl(
           esPesable ? insert.codigo : insert.codigo_barra,

@@ -44,6 +44,6 @@ export class ProductsController {
       throw new BadRequestException('No se pudo obtener el número de caja');
     }
 
-    return await this.ventasAutService.getProduct(caja, dto.scan, dto.cantidad);
+    return await this.ventasAutService.getProduct(caja, dto.scan, dto.cantidad_a_insertar, dto.cantidad_acumulada);
   }
 }
