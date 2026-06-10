@@ -429,7 +429,9 @@ export class VentasAutService {
         cantidad: cantidad_acumulada,
         total_venta: insert.total_venta,
         imagen: this.getProductImageUrl(
-          esPesable ? insert.codigo : insert.codigo_barra,
+          esPesable || insert.codigo_barra?.startsWith('24')
+            ? insert.codigo
+            : insert.codigo_barra,
         ),
         es_pesable: esPesable,
       };
