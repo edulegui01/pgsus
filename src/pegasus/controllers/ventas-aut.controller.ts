@@ -1,6 +1,8 @@
 import {
   Controller,
+  Get,
   Post,
+  Param,
   Body,
   HttpStatus,
   HttpCode,
@@ -19,6 +21,14 @@ import {
 export class VentasAutController {
   private readonly logger = new Logger(VentasAutService.name);
   constructor(private readonly ventasAutService: VentasAutService) {}
+
+  @Get('codigo-barra/:codigoBarra')
+  @HttpCode(HttpStatus.OK)
+  async findLastByCodigoBarra(
+    @Param('codigoBarra') codigoBarra: string,
+  ): Promise<VentasAut | null> {
+    return this.ventasAutService.findLastByCodigoBarra(codigoBarra);
+  }
 
   @Post('pago-tarjeta')
   @HttpCode(HttpStatus.OK)

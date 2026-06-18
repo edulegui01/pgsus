@@ -316,6 +316,62 @@ export class VentasAutRepository {
       throw error;
     }
   }
+
+  async findLastByCodigoBarra(codigoBarra: string): Promise<VentasAut | null> {
+    try {
+      const sql = `
+        SELECT TOP 1
+          id, zeta, caja, ticket, operacion, codigo,
+          codigo_barra, cantidad, precio, total_venta, tipo_cobro, cod_condicion,
+          bin, cod_tarjeta, nro_boleta, cod_autorizacion, tipo_qr, importe_cobrado,
+          estado, obs, documento, nombre_cliente, cantidad_asignada
+        FROM dbo.ventas_aut
+        WHERE codigo_barra = @param0 AND codigo IS NOT NULL AND codigo <> ''
+        ORDER BY id DESC
+      `;
+
+      const result = await this.databaseService.query<any>(sql, [codigoBarra]);
+
+      if (!result || result.length === 0) {
+        return null;
+      }
+
+      const row = result[0];
+      const ventasAut: VentasAut = {
+        id: row.id,
+        zeta: row.zeta,
+        caja: row.caja,
+        ticket: row.ticket,
+        operacion: row.operacion,
+        codigo: row.codigo,
+        codigo_barra: row.codigo_barra,
+        cantidad: parseFloat(row.cantidad),
+        precio: parseFloat(row.precio),
+        total_venta: parseFloat(row.total_venta),
+        tipo_cobro: row.tipo_cobro,
+        cod_condicion: row.cod_condicion,
+        bin: row.bin,
+        cod_tarjeta: row.cod_tarjeta,
+        nro_boleta: row.nro_boleta,
+        cod_autorizacion: row.cod_autorizacion,
+        tipo_qr: row.tipo_qr,
+        importe_cobrado: parseFloat(row.importe_cobrado),
+        estado: row.estado,
+        obs: row.obs,
+        documento: row.documento,
+        nombre_cliente: row.nombre_cliente,
+        cantidad_asignada: row.cantidad_asignada != null ? parseFloat(row.cantidad_asignada) : undefined,
+      };
+
+      return ventasAut;
+    } catch (error) {
+      this.logger.error(
+        `Error finding last record by codigo_barra ${codigoBarra}`,
+        error.message,
+      );
+      throw error;
+    }
+  }
   //se usa para anular los detalles del ticket que quedo pendiente
   async createInvoice(
     caja: number,

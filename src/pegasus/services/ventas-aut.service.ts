@@ -352,6 +352,17 @@ export class VentasAutService {
     }
   }
 
+  async findLastByCodigoBarra(codigoBarra: string): Promise<VentasAut | null> {
+    try {
+      this.logger.log(`Buscando último registro por codigo_barra: ${codigoBarra}`);
+
+      return await this.ventasAutRepository.findLastByCodigoBarra(codigoBarra);
+    } catch (error) {
+      this.logger.error(`Error in findLastByCodigoBarra: ${error.message}`);
+      throw error;
+    }
+  }
+
   async getProduct(
     caja: number,
     scan: string,
