@@ -214,7 +214,7 @@ export class VentasAutService {
       );
 
       // Paso 1: Registrar solicitud de cobro en Pegasus antes del request QR
-      //await this.solicitudCobroQr(data.caja, 2, 2);
+      await this.solicitudCobroQr(data.caja, 2, 2);
 
       // Paso 2: Realizar pago QR en POS Bancard
       const qrRequest = { facturaNro: data.facturaNro, monto: data.monto };
