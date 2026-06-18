@@ -30,6 +30,7 @@ import {
   InsertarProductosResponseDto,
 } from '../dto/insertar-productos.dto';
 import { ProductoInsertException } from '../exceptions/producto-insert.exception';
+import issuerMap from '../constants/issuer-map.json';
 
 @Injectable()
 export class VentasAutService {
@@ -250,12 +251,15 @@ export class VentasAutService {
       }
 
       // Paso 3: Registrar confirmación de cobro en Pegasus
+      const tipoQr =
+        (issuerMap as Record<string, string>)[qrResponse.issuerId] ?? '';
+
       await this.confirmacionCobroQr(
         data.caja,
         3,
         qrResponse.nroBoleta,
         qrResponse.codigoAutorizacion,
-        qrResponse.nombreTarjeta,
+        tipoQr,
         data.monto,
       );
 
