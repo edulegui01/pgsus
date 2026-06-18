@@ -25,4 +25,5 @@ export interface VentasAut {
   issuerid?: string;
   nombre_tarjeta?: string;
   nombre_cli_tarj?: string;
+  cantidad_asignada?: number;
 }

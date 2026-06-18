@@ -4,7 +4,7 @@ export interface ModelProducTicket {
   precio: number;
   total: number;
   descripcion: string;
-  peso_gramos: string;
+  peso: string;
   cantidad: number;
   total_venta: number;
   imagen: string;

@@ -356,11 +356,10 @@ export class VentasAutService {
     caja: number,
     scan: string,
     cantidad_a_insertar: number,
-    cantidad_acumulada: number,
   ): Promise<ModelProducTicket> {
     try {
       this.logger.log(
-        `Getting product - caja: ${caja}, scan: ${scan}, cantidad_a_insertar: ${cantidad_a_insertar}, cantidad_acumulada: ${cantidad_acumulada}`,
+        `Getting product - caja: ${caja}, scan: ${scan}, cantidad_a_insertar: ${cantidad_a_insertar}`,
       );
 
       // Insert product
@@ -399,20 +398,19 @@ export class VentasAutService {
         `[getProduct] codigo_barra: "${insert.codigo_barra}" | largo: ${insert.codigo_barra?.length} | startsWith('20'): ${insert.codigo_barra?.startsWith('20')} | esPesable: ${esPesable}`,
       );
 
-      let pesoGramos = '';
+      let peso = '';
       if (esPesable) {
-        const pesoRaw = insert.codigo_barra.substring(7, 12);
-        pesoGramos = parseInt(pesoRaw, 10).toString();
+        peso = (insert.cantidad_asignada ?? 0).toString();
         this.logger.log(
-          `[getProduct] Descomposicion pesable - prefijo: "${insert.codigo_barra.substring(0, 2)}" | codigo_interno: "${insert.codigo_barra.substring(2, 7)}" | peso_raw: "${pesoRaw}" | pesoGramos: "${pesoGramos}" | digito_verificador: "${insert.codigo_barra.substring(12)}"`,
+          `[getProduct] Pesable - cantidad_asignada (kg): "${peso}"`,
         );
       } else {
         const scanningPeso = await this.scanningPesoService.findByScanning(
           insert.codigo,
         );
-        pesoGramos = scanningPeso?.peso?.toString() ?? '';
+        peso = scanningPeso?.peso?.toString() ?? '';
         this.logger.log(
-          `[getProduct] No pesable - pesoGramos desde scanning_peso: "${pesoGramos}"`,
+          `[getProduct] No pesable - peso desde scanning_peso: "${peso}"`,
         );
       }
 
@@ -422,11 +420,11 @@ export class VentasAutService {
         codigo_barras: insert.codigo_barra,
         precio: insert.precio,
         total: esPesable
-          ? Math.round((parseInt(pesoGramos) / 1000) * insert.precio)
-          : insert.precio * cantidad_acumulada,
+          ? Math.round((insert.cantidad_asignada ?? 0) * insert.precio)
+          : insert.precio * (insert.cantidad_asignada ?? 0),
         descripcion: producto.descripcion_corta ?? '',
-        peso_gramos: pesoGramos,
-        cantidad: cantidad_acumulada,
+        peso,
+        cantidad: insert.cantidad_asignada ?? 0,
         total_venta: insert.total_venta,
         imagen: this.getProductImageUrl(
           esPesable || insert.codigo_barra?.startsWith('24')

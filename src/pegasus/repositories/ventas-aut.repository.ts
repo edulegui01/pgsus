@@ -58,7 +58,7 @@ export class VentasAutRepository {
           id, zeta, caja, ticket, operacion, codigo,
           codigo_barra, cantidad, precio, total_venta, tipo_cobro, cod_condicion,
           bin, cod_tarjeta, nro_boleta, cod_autorizacion, tipo_qr, importe_cobrado,
-          estado, obs, documento, nombre_cliente, nro_ecom
+          estado, obs, documento, nombre_cliente, nro_ecom, cantidad_asignada
         FROM dbo.ventas_aut
         WHERE id = @param0
       `;
@@ -96,6 +96,7 @@ export class VentasAutRepository {
         documento: row.documento,
         nombre_cliente: row.nombre_cliente,
         nro_ecom: row.nro_ecom,
+        cantidad_asignada: row.cantidad_asignada != null ? parseFloat(row.cantidad_asignada) : undefined,
       };
 
       return ventasAut;
@@ -271,7 +272,7 @@ export class VentasAutRepository {
           id, zeta, caja, ticket, operacion, codigo,
           codigo_barra, cantidad, precio, total_venta, tipo_cobro, cod_condicion,
           bin, cod_tarjeta, nro_boleta, cod_autorizacion, tipo_qr, importe_cobrado,
-          estado, obs, documento, nombre_cliente
+          estado, obs, documento, nombre_cliente, cantidad_asignada
         FROM dbo.ventas_aut
         WHERE id = @param0
       `;
@@ -306,6 +307,7 @@ export class VentasAutRepository {
         obs: row.obs,
         documento: row.documento,
         nombre_cliente: row.nombre_cliente,
+        cantidad_asignada: row.cantidad_asignada != null ? parseFloat(row.cantidad_asignada) : undefined,
       };
 
       return ventasAut;
@@ -504,7 +506,7 @@ export class VentasAutRepository {
           id, zeta, caja, ticket, operacion, codigo,
           codigo_barra, cantidad, precio, total_venta, tipo_cobro, cod_condicion,
           bin, cod_tarjeta, nro_boleta, cod_autorizacion, tipo_qr, importe_cobrado,
-          estado, obs, documento, nombre_cliente, nro_ecom
+          estado, obs, documento, nombre_cliente, nro_ecom, cantidad_asignada
         FROM dbo.ventas_aut
         WHERE estado = 1 AND ticket = @param0
       `;
@@ -539,6 +541,7 @@ export class VentasAutRepository {
         documento: row.documento,
         nombre_cliente: row.nombre_cliente,
         nro_ecom: row.nro_ecom,
+        cantidad_asignada: row.cantidad_asignada != null ? parseFloat(row.cantidad_asignada) : undefined,
       }));
 
       return ventasAutList;
