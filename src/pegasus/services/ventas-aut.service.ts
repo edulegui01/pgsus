@@ -383,6 +383,27 @@ export class VentasAutService {
         );
       }
 
+      // When a removal empties out the ticket line entirely, Pegasus confirms
+      // estado === 1 but leaves "codigo" blank since there's no line left to report.
+      if (!insert.codigo) {
+        this.logger.log(
+          `[getProduct] Producto eliminado del ticket - codigo_barra: "${insert.codigo_barra}", cantidad_asignada: ${insert.cantidad_asignada}`,
+        );
+
+        return {
+          codigo: '',
+          codigo_barras: insert.codigo_barra,
+          precio: insert.precio,
+          total: 0,
+          descripcion: '',
+          peso: '',
+          cantidad: 0,
+          total_venta: insert.total_venta,
+          imagen: '',
+          es_pesable: false,
+        };
+      }
+
       // Search product information
       const producto = await this.productsService.findProductByCode(
         insert.codigo,
