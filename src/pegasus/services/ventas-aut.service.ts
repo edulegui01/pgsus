@@ -499,7 +499,10 @@ export class VentasAutService {
     return '';
   }
 
-  private async verifyPegasusInsert(id: number): Promise<VentasAut> {
+  private async verifyPegasusInsert(
+    id: number,
+    maxIntentos = 100,
+  ): Promise<VentasAut> {
     let estado = 0;
     let intentos = 0;
     let ventasAut: VentasAut | null = null;
@@ -511,7 +514,7 @@ export class VentasAutService {
         throw new BadRequestException(ventasAut.obs || 'Error en la operación');
       }
 
-      if (ventasAut.estado === 1 || intentos === 100) {
+      if (ventasAut.estado === 1 || intentos === maxIntentos) {
         estado = 1;
       }
 
@@ -753,6 +756,12 @@ export class VentasAutService {
 
       const result = await this.verifyPegasusInsert(id);
 
+      if (!result || result.estado !== 1) {
+        throw new BadRequestException(
+          'La solicitud de cobro con tarjeta no fue confirmada por Pegasus',
+        );
+      }
+
       this.logger.log(`Solicitud cobro tarjeta verificada con ID: ${id}`);
       return result;
     } catch (error) {
@@ -784,6 +793,12 @@ export class VentasAutService {
       }
 
       const result = await this.verifyPegasusInsert(id);
+
+      if (!result || result.estado !== 1) {
+        throw new BadRequestException(
+          'La solicitud de cobro con QR no fue confirmada por Pegasus',
+        );
+      }
 
       this.logger.log(`Solicitud cobro QR verificada con ID: ${id}`);
       return result;
@@ -819,7 +834,21 @@ export class VentasAutService {
         );
       }
 
-      const result = await this.verifyPegasusInsert(id);
+      // El cobro en Bancard ya ocurrió en este punto: le damos a Pegasus mucho
+      // más margen (60s) antes de rendirnos, para no marcar como fallida una
+      // venta que en realidad sí se cobró.
+      const result = await this.verifyPegasusInsert(id, 1200);
+
+      if (!result || result.estado !== 1) {
+        this.logger.error(
+          `⚠️ COBRO REALIZADO SIN CONFIRMAR EN PEGASUS - requiere revisión manual. ` +
+            `caja: ${caja}, nro_boleta: ${nroBoleta}, cod_autorizacion: ${codAutorizacion}, importe: ${importeCobrado}`,
+        );
+        throw new BadRequestException(
+          'El cobro con tarjeta se realizó pero no fue confirmado por Pegasus. ' +
+            'No anular el ticket: requiere revisión manual.',
+        );
+      }
 
       this.logger.log(`Confirmación cobro tarjeta verificada con ID: ${id}`);
       return result;
@@ -857,7 +886,21 @@ export class VentasAutService {
         );
       }
 
-      const result = await this.verifyPegasusInsert(id);
+      // El cobro QR ya ocurrió en este punto: le damos a Pegasus mucho más
+      // margen (60s) antes de rendirnos, para no marcar como fallida una
+      // venta que en realidad sí se cobró.
+      const result = await this.verifyPegasusInsert(id, 1200);
+
+      if (!result || result.estado !== 1) {
+        this.logger.error(
+          `⚠️ COBRO REALIZADO SIN CONFIRMAR EN PEGASUS - requiere revisión manual. ` +
+            `caja: ${caja}, nro_boleta: ${nroBoleta}, cod_autorizacion: ${codAutorizacion}, importe: ${importeCobrado}`,
+        );
+        throw new BadRequestException(
+          'El cobro con QR se realizó pero no fue confirmado por Pegasus. ' +
+            'No anular el ticket: requiere revisión manual.',
+        );
+      }
 
       this.logger.log(`Confirmación cobro QR verificada con ID: ${id}`);
       return result;
@@ -958,7 +1001,18 @@ export class VentasAutService {
     const resultados = await Promise.all(
       inserciones.map(async (insercion) => {
         const t1 = Date.now();
-        await this.verifyPegasusProducts(insercion.id, insercion.cod_barra);
+        const verificado = await this.verifyPegasusProducts(
+          insercion.id,
+          insercion.cod_barra,
+        );
+
+        if (!verificado || verificado.estado !== 1) {
+          throw new ProductoInsertException(
+            insercion.cod_barra,
+            'El producto no fue confirmado por Pegasus',
+          );
+        }
+
         this.logger.log(
           `[${Date.now() - tiempoInicio}ms] Verificado ${insercion.cod_barra} en ${Date.now() - t1}ms`,
         );
