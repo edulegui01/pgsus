@@ -910,6 +910,28 @@ export class VentasAutService {
     }
   }
 
+  // Espera a que Pegasus resuelva la consulta de cliente, saliendo apenas
+  // llega a cualquier estado terminal (no solo el 1) para no demorar de más
+  // el caso "cliente no encontrado" (estado 3).
+  private async verifyPegasusClient(
+    id: number,
+    maxIntentos = 100,
+  ): Promise<VentasAut> {
+    for (let intentos = 0; intentos < maxIntentos; intentos++) {
+      const ventasAut = await this.selectVerifyInsert(id);
+
+      if (ventasAut.estado !== 0) {
+        return ventasAut;
+      }
+
+      await this.delay(50);
+    }
+
+    throw new BadRequestException(
+      'Problemas con la conexion con el SLC pegasus',
+    );
+  }
+
   //se usa para buscar datos del cliente
   async findClientDetails(
     caja: number,
@@ -927,15 +949,7 @@ export class VentasAutService {
         throw new BadRequestException('Could not consult client');
       }
 
-      await this.delay(1000);
-
-      const result = await this.ventasAutRepository.selectVerifyInsert(id);
-
-      if (!result) {
-        throw new BadRequestException(
-          'Problemas con la conexion con el SLC pegasus',
-        );
-      }
+      const result = await this.verifyPegasusClient(id);
 
       if (result.estado === 3) {
         throw new NotFoundException(
