@@ -912,10 +912,12 @@ export class VentasAutService {
 
   // Espera a que Pegasus resuelva la consulta de cliente, saliendo apenas
   // llega a cualquier estado terminal (no solo el 1) para no demorar de más
-  // el caso "cliente no encontrado" (estado 3).
+  // el caso "cliente no encontrado" (estado 3). Se da un margen de 60s
+  // (igual que en la confirmación de cobro) antes de asumir que hay un
+  // problema de conexión con Pegasus.
   private async verifyPegasusClient(
     id: number,
-    maxIntentos = 100,
+    maxIntentos = 1200,
   ): Promise<VentasAut> {
     for (let intentos = 0; intentos < maxIntentos; intentos++) {
       const ventasAut = await this.selectVerifyInsert(id);
