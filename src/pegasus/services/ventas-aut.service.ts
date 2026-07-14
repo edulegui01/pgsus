@@ -525,6 +525,32 @@ export class VentasAutService {
     return ventasAut!;
   }
 
+  private async verifyInsertWithPolling(
+    id: number,
+    maxIntentos = 60,
+  ): Promise<VentasAut> {
+    let estado = 0;
+    let intentos = 0;
+    let ventasAut: VentasAut | null = null;
+
+    while (estado === 0) {
+      ventasAut = await this.ventasAutRepository.selectVerifyInsert(id);
+
+      if (ventasAut.estado === 2) {
+        throw new BadRequestException(ventasAut.obs || 'Error en la operación');
+      }
+
+      if (ventasAut.estado === 1 || intentos === maxIntentos) {
+        estado = 1;
+      }
+
+      await this.delay(1000);
+      intentos++;
+    }
+
+    return ventasAut!;
+  }
+
   private async verifyPegasusProducts(
     id: number,
     codBarra: string,
@@ -670,9 +696,7 @@ export class VentasAutService {
         throw new BadRequestException('Could not register client');
       }
 
-      await this.delay(1000);
-
-      const result = await this.ventasAutRepository.selectVerifyInsert(id);
+      const result = await this.verifyInsertWithPolling(id);
 
       if (!result || result.estado !== 1) {
         throw new BadRequestException(
@@ -710,9 +734,7 @@ export class VentasAutService {
         throw new BadRequestException('Could not create invoice');
       }
 
-      await this.delay(1000);
-
-      const invoice = await this.ventasAutRepository.selectVerifyInsert(id);
+      const invoice = await this.verifyInsertWithPolling(id);
 
       if (!invoice || invoice.estado !== 1) {
         throw new BadRequestException(
